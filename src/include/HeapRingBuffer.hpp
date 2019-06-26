@@ -9,6 +9,7 @@ namespace puggo {
 		unsigned int index = 0;
 		unsigned int length = 0;
 		unsigned int capacity = 0;
+		bool freeMemoryInDeallocator = true;
 
 	public:
 		HeapRingBuffer() {}
@@ -18,12 +19,20 @@ namespace puggo {
 			buffer(new T[capacity]) {
 		}
 
+		HeapRingBuffer(const unsigned int& capacity, T* buffer) :
+			capacity(capacity),
+			buffer(buffer),
+			freeMemoryInDeallocator(false) {
+		}
+
 		HeapRingBuffer(const HeapRingBuffer&) = delete;
 		HeapRingBuffer(HeapRingBuffer&&) = delete;
 
 		~HeapRingBuffer() noexcept {
 			if (buffer != nullptr) {
-				delete[] buffer;
+				if (freeMemoryInDeallocator) {
+					delete[] buffer;
+				}
 				buffer = nullptr;
 				capacity = 0;
 				length = 0;
@@ -37,6 +46,7 @@ namespace puggo {
 			capacity = ringBuffer.capacity;
 			length = ringBuffer.length;
 			index = ringBuffer.index;
+			freeMemoryInDeallocator = ringBuffer.freeMemoryInDeallocator;
 
 			for (size_t i = 0; i < length; ++i) {
 				unsigned int entry = (index + i) % capacity;
@@ -54,6 +64,7 @@ namespace puggo {
 			capacity = ringBuffer.capacity;
 			length = ringBuffer.length;
 			index = ringBuffer.index;
+			freeMemoryInDeallocator = ringBuffer.freeMemoryInDeallocator;
 
 			ringBuffer.buffer = nullptr;
 			ringBuffer.capacity = 0;

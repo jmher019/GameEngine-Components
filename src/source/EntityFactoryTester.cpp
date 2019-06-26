@@ -4,6 +4,7 @@ using namespace puggo;
 
 void EntityFactoryTester::initialize() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	AllocationSystem::init(AllocationSystem::ONE_GIGABYTE);
 	EntityFactory::initialize();
 }
 

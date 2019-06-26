@@ -20,54 +20,26 @@ void EntityFactory::initialize(const unsigned int entityCapacity) {
 	assert(EntityFactory::generations == nullptr);
 	
 	numEntities = entityCapacity;
-	generations = new unsigned int[numEntities];
+
+	generations = static_cast<unsigned int*>(AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity));
 	memset(generations, 0, sizeof(unsigned int) * entityCapacity);
 
-	freedIndices = move(HeapRingBuffer<unsigned int>(numEntities));
+	freedIndices = move(HeapRingBuffer<unsigned int>(entityCapacity, static_cast<unsigned int*>(AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity))));
 
 	// Initialize components here
-	collisionBoxComponents = new CollisionBoxComponent[numEntities];
-	collisionCapsuleComponents = new CollisionCapsuleComponent[numEntities];
-	collisionSphereComponents = new CollisionSphereComponent[numEntities];
-	meshComponents = new MeshComponent[numEntities];
-	moveComponents = new MoveComponent[numEntities];
-	physicsComponents = new PhysicsComponent[numEntities];
-	shaderComponents = new ShaderComponent[numEntities];
-	transformComponents = new TransformComponent[numEntities];
+	collisionBoxComponents = static_cast<CollisionBoxComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionBoxComponent) * entityCapacity));
+	collisionCapsuleComponents = static_cast<CollisionCapsuleComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionCapsuleComponent) * entityCapacity));
+	collisionSphereComponents = static_cast<CollisionSphereComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionSphereComponent) * entityCapacity));
+	meshComponents = static_cast<MeshComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(MeshComponent) * entityCapacity));
+	moveComponents = static_cast<MoveComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(MoveComponent) * entityCapacity));
+	physicsComponents = static_cast<PhysicsComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(PhysicsComponent) * entityCapacity));
+	shaderComponents = static_cast<ShaderComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(ShaderComponent) * entityCapacity));
+	transformComponents = static_cast<TransformComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(TransformComponent) * entityCapacity));
 }
 
 void EntityFactory::cleanUp() {
 	assert(generations != nullptr);
-
 	numEntities = 0;
-
-	delete[] generations;
-	generations = nullptr;
-
-	delete[] collisionBoxComponents;
-	collisionBoxComponents = nullptr;
-
-	delete[] collisionCapsuleComponents;
-	collisionCapsuleComponents = nullptr;
-
-	delete[] collisionSphereComponents;
-	collisionSphereComponents = nullptr;
-
-	delete[] meshComponents;
-	meshComponents = nullptr;
-
-	delete[] moveComponents;
-	moveComponents = nullptr;
-
-	delete[] physicsComponents;
-	physicsComponents = nullptr;
-
-	delete[] shaderComponents;
-	shaderComponents = nullptr;
-
-	delete[] transformComponents;
-	transformComponents = nullptr;
-
 	lastIndex = 0;
 }
 
