@@ -15,6 +15,8 @@
 #include <ShaderComponent.hpp>
 #include <TransformComponent.hpp>
 
+#include <AllocationSystem.hpp>
+
 namespace puggo {
 	enum class Components {
 		COLLISION_BOX,

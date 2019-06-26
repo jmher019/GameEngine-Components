@@ -1,3 +1,6 @@
 [submodule "lib/glm"]
 	path = lib/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "lib/allocation"]
+	path = lib/allocation
+	url = https://github.com/jmher019/GameEngine-Allocation.git
