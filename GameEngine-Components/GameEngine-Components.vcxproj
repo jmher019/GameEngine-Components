@@ -84,11 +84,10 @@
       <AdditionalDependencies>Allocation.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(ProjectDir)..\dist
-mkdir $(ProjectDir)..\dist\lib
-mkdir $(ProjectDir)..\dist\lib\x86
-mkdir $(ProjectDir)..\dist\lib\x86\Debug
-copy $(ProjectDir)..\x86\Debug\* $(ProjectDir)..\dist\lib\x86\Debug</Command>
+      <Command>if not exist $(ProjectDir)..\dist\lib\x86\Debug (
+md $(ProjectDir)..\dist\lib\x86\Debug
+)
+copy $(ProjectDir)Debug\GameEngine-Components.lib $(ProjectDir)..\dist\lib\x86\Debug</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -105,11 +104,10 @@ copy $(ProjectDir)..\x86\Debug\* $(ProjectDir)..\dist\lib\x86\Debug</Command>
       <AdditionalLibraryDirectories>$(ProjectDir)..\lib\allocation\dist\lib\x64\Debug</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(ProjectDir)..\dist
-mkdir $(ProjectDir)..\dist\lib
-mkdir $(ProjectDir)..\dist\lib\x64
-mkdir $(ProjectDir)..\dist\lib\x64\Debug
-copy $(ProjectDir)..\x64\Debug\* $(ProjectDir)..\dist\lib\x64\Debug</Command>
+      <Command>if not exist $(ProjectDir)..\dist\lib\x64\Debug (
+md $(ProjectDir)..\dist\lib\x64\Debug
+)
+copy $(ProjectDir)x64\Debug\GameEngine-Components.lib $(ProjectDir)..\dist\lib\x64\Debug</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -130,11 +128,10 @@ copy $(ProjectDir)..\x64\Debug\* $(ProjectDir)..\dist\lib\x64\Debug</Command>
       <AdditionalLibraryDirectories>$(ProjectDir)..\lib\allocation\dist\lib\x86\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(ProjectDir)..\dist
-mkdir $(ProjectDir)..\dist\lib
-mkdir $(ProjectDir)..\dist\lib\x86
-mkdir $(ProjectDir)..\dist\lib\x86\Release
-copy $(ProjectDir)..\x86\Release\* $(ProjectDir)..\dist\lib\x86\Release</Command>
+      <Command>if not exist $(ProjectDir)..\dist\lib\x86\Release (
+md $(ProjectDir)..\dist\lib\x86\Release
+)
+copy $(ProjectDir)Release\GameEngine-Components.lib $(ProjectDir)..\dist\lib\x86\Release</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,11 +152,10 @@ copy $(ProjectDir)..\x86\Release\* $(ProjectDir)..\dist\lib\x86\Release</Command
       <AdditionalLibraryDirectories>$(ProjectDir)..\lib\allocation\dist\lib\x64\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(ProjectDir)..\dist
-mkdir $(ProjectDir)..\dist\lib
-mkdir $(ProjectDir)..\dist\lib\x64
-mkdir $(ProjectDir)..\dist\lib\x64\Release
-copy $(ProjectDir)..\x64\Release\* $(ProjectDir)..\dist\lib\x64\Release</Command>
+      <Command>if not exist $(ProjectDir)..\dist\lib\x64\Release (
+md $(ProjectDir)..\dist\lib\x64\Release
+)
+copy $(ProjectDir)x64\Release\GameEngine-Components.lib $(ProjectDir)..\dist\lib\x64\Release</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

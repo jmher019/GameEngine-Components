@@ -175,10 +175,9 @@ bool EntityFactory::addComponent(Entity& entity, const Components& component) {
 			transformComponents[entity.id.index] = TransformComponent();
 			return true;
 		}
-		default: {
-			return false;
-		}
 	}
+
+	return false;
 }
 
 bool EntityFactory::removeComponent(Entity& entity, const Components& component) {
@@ -189,72 +188,71 @@ bool EntityFactory::removeComponent(Entity& entity, const Components& component)
 	}
 
 	switch (component) {
-	case Components::COLLISION_BOX: {
-		if (!entity.flags.collisionBox) {
-			return false;
-		}
+		case Components::COLLISION_BOX: {
+			if (!entity.flags.collisionBox) {
+				return false;
+			}
 
-		entity.flags.collisionBox = 0;
-		return true;
-	}
-	case Components::COLLISION_CAPSULE: {
-		if (!entity.flags.collisionCapsule) {
-			return false;
+			entity.flags.collisionBox = 0;
+			return true;
 		}
+		case Components::COLLISION_CAPSULE: {
+			if (!entity.flags.collisionCapsule) {
+				return false;
+			}
 
-		entity.flags.collisionCapsule = 0;
-		return true;
-	}
-	case Components::COLLISION_SPHERE: {
-		if (!entity.flags.collisionSphere) {
-			return false;
+			entity.flags.collisionCapsule = 0;
+			return true;
 		}
+		case Components::COLLISION_SPHERE: {
+			if (!entity.flags.collisionSphere) {
+				return false;
+			}
 
-		entity.flags.collisionSphere = 0;
-		return true;
-	}
-	case Components::MESH: {
-		if (!entity.flags.mesh) {
-			return false;
+			entity.flags.collisionSphere = 0;
+			return true;
 		}
+		case Components::MESH: {
+			if (!entity.flags.mesh) {
+				return false;
+			}
 
-		entity.flags.mesh = 0;
-		return true;
-	}
-	case Components::MOVE: {
-		if (!entity.flags.move) {
-			return false;
+			entity.flags.mesh = 0;
+			return true;
 		}
+		case Components::MOVE: {
+			if (!entity.flags.move) {
+				return false;
+			}
 
-		entity.flags.move = 0;
-		return true;
-	}
-	case Components::PHYSICS: {
-		if (!entity.flags.physics) {
-			return false;
+			entity.flags.move = 0;
+			return true;
 		}
+		case Components::PHYSICS: {
+			if (!entity.flags.physics) {
+				return false;
+			}
 
-		entity.flags.physics = 0;
-		return true;
-	}
-	case Components::SHADER: {
-		if (!entity.flags.shader) {
-			return false;
+			entity.flags.physics = 0;
+			return true;
 		}
+		case Components::SHADER: {
+			if (!entity.flags.shader) {
+				return false;
+			}
 
-		entity.flags.shader = 0;
-		return true;
-	}
-	case Components::TRANSFORM: {
-		if (!entity.flags.transform) {
-			return false;
+			entity.flags.shader = 0;
+			return true;
 		}
+		case Components::TRANSFORM: {
+			if (!entity.flags.transform) {
+				return false;
+			}
 
-		entity.flags.transform = 0;
-		return true;
+			entity.flags.transform = 0;
+			return true;
+		}
 	}
-	default: {
-		return false;
-	}
-	}
+
+	return false;
 }
