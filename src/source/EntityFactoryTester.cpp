@@ -23,11 +23,18 @@ void EntityFactoryTester::runTests() {
 void EntityFactoryTester::createBasicEntity() {
 	cout << "running: " << __func__ << endl;
 
-	Entity entity = EntityFactory::createBasicEntity();
-	
-	assert(entity.flags.transform);
-	assert(EntityFactory::doesEntityExist(entity));
-	entities.push_back(entity);
+	vector<Entity>& entities = this->entities;
+	EntityFactory::createBasicEntity().matchWith(
+		[&entities](Entity entity) {
+			assert(entity.flags.transform);
+			assert(EntityFactory::doesEntityExist(entity));
+			entities.push_back(entity);
+		},
+		[](string errorMessage) {
+			cout << errorMessage << endl;
+			throw exception(errorMessage.c_str());
+		}
+	);
 
 	cout << __func__ << ": successful" << endl;
 }
@@ -35,12 +42,19 @@ void EntityFactoryTester::createBasicEntity() {
 void EntityFactoryTester::createEntityWithCollisionBox() {
 	cout << "running: " << __func__ << endl;
 
-	Entity entity = EntityFactory::createBasicEntity();
-	EntityFactory::addComponent(entity, Components::COLLISION_BOX);
-	
-	assert(entity.flags.collisionBox);
-	assert(EntityFactory::doesEntityExist(entity));
-	entities.push_back(entity);
+	vector<Entity>& entities = this->entities;
+	EntityFactory::createBasicEntity().matchWith(
+		[&entities](Entity entity) {
+			EntityFactory::addComponent(entity, Components::COLLISION_BOX);
+			assert(entity.flags.collisionBox);
+			assert(EntityFactory::doesEntityExist(entity));
+			entities.push_back(entity);
+		},
+		[](string errorMessage) {
+			cout << errorMessage << endl;
+			throw exception(errorMessage.c_str());
+		}
+	);
 
 	cout << __func__ << ": successful" << endl;
 }
@@ -49,10 +63,13 @@ void EntityFactoryTester::generateOneThousandEntities() {
 	cout << "running: " << __func__ << endl;
 
 	size_t initialSize = entities.size();
-
+	vector<Entity>& entities = this->entities;
 	for (size_t i = 0; i < 1000; ++i) {
-		Entity entity = EntityFactory::createBasicEntity();
-		entities.push_back(entity);
+		EntityFactory::createBasicEntity()
+			.matchWith(
+				[&entities](Entity entity) { entities.push_back(entity); },
+				[](string errorMessage) { cout << errorMessage << endl; }
+			);
 	}
 
 	assert(entities.size() - initialSize == 1000);
@@ -78,9 +95,13 @@ void EntityFactoryTester::generateThreeHundredMoreEntities() {
 	cout << "running: " << __func__ << endl;
 
 	size_t initialSize = entities.size();
+	vector<Entity>& entities = this->entities;
 	for (size_t i = 0; i < 300; ++i) {
-		Entity entity = EntityFactory::createBasicEntity();
-		entities.push_back(entity);
+		EntityFactory::createBasicEntity()
+			.matchWith(
+				[&entities](Entity entity) { entities.push_back(entity); },
+				[](string errorMessage) { cout << errorMessage << endl; }
+		);
 	}
 
 	assert(entities.size() - initialSize == 300);

@@ -2,7 +2,7 @@
 
 using namespace puggo;
 
-unsigned int EntityFactory::numEntities = MINIMUM_ENTITIES;
+unsigned int EntityFactory::numEntities = 0;
 HeapRingBuffer<unsigned int> EntityFactory::freedIndices;
 unsigned int EntityFactory::lastIndex = 0;
 unsigned int* EntityFactory::generations = nullptr;
@@ -16,68 +16,78 @@ ShaderComponent* EntityFactory::shaderComponents = nullptr;
 TransformComponent* EntityFactory::transformComponents = nullptr;
 
 void EntityFactory::initialize(const unsigned int entityCapacity) {
-	assert(EntityFactory::numEntities >= MINIMUM_ENTITIES);
-	assert(EntityFactory::generations == nullptr);
+	if (generations == nullptr && entityCapacity > 0) {
+		numEntities = entityCapacity;
+
+		AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::generations = static_cast<unsigned int*>(ptr); });
+		memset(generations, 0, sizeof(unsigned int) * entityCapacity);
+
+		AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity)
+			.map([&entityCapacity](void* ptr) { EntityFactory::freedIndices = move(HeapRingBuffer<unsigned int>(entityCapacity, static_cast<unsigned int*>(ptr))); });
+
+		// Initialize components here
+		AllocationSystem::requestMemoryFromSystem(sizeof(CollisionBoxComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::collisionBoxComponents = static_cast<CollisionBoxComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(CollisionCapsuleComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::collisionCapsuleComponents = static_cast<CollisionCapsuleComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(CollisionSphereComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::collisionSphereComponents = static_cast<CollisionSphereComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(MeshComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::meshComponents = static_cast<MeshComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(MoveComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::moveComponents = static_cast<MoveComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(PhysicsComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::physicsComponents = static_cast<PhysicsComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(ShaderComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::shaderComponents = static_cast<ShaderComponent*>(ptr); });
+		AllocationSystem::requestMemoryFromSystem(sizeof(TransformComponent) * entityCapacity)
+			.map([](void* ptr) { EntityFactory::transformComponents = static_cast<TransformComponent*>(ptr); });
+	}
 	
-	numEntities = entityCapacity;
-
-	generations = static_cast<unsigned int*>(AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity));
-	memset(generations, 0, sizeof(unsigned int) * entityCapacity);
-
-	freedIndices = move(HeapRingBuffer<unsigned int>(entityCapacity, static_cast<unsigned int*>(AllocationSystem::requestMemoryFromSystem(sizeof(unsigned int) * entityCapacity))));
-
-	// Initialize components here
-	collisionBoxComponents = static_cast<CollisionBoxComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionBoxComponent) * entityCapacity));
-	collisionCapsuleComponents = static_cast<CollisionCapsuleComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionCapsuleComponent) * entityCapacity));
-	collisionSphereComponents = static_cast<CollisionSphereComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(CollisionSphereComponent) * entityCapacity));
-	meshComponents = static_cast<MeshComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(MeshComponent) * entityCapacity));
-	moveComponents = static_cast<MoveComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(MoveComponent) * entityCapacity));
-	physicsComponents = static_cast<PhysicsComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(PhysicsComponent) * entityCapacity));
-	shaderComponents = static_cast<ShaderComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(ShaderComponent) * entityCapacity));
-	transformComponents = static_cast<TransformComponent*>(AllocationSystem::requestMemoryFromSystem(sizeof(TransformComponent) * entityCapacity));
 }
 
 void EntityFactory::cleanUp() {
-	assert(generations != nullptr);
-	numEntities = 0;
-	lastIndex = 0;
+	if (numEntities != 0) {
+		numEntities = 0;
+		lastIndex = 0;
+	}
 }
 
-Entity EntityFactory::createBasicEntity() {
-	assert(generations != nullptr);
+Result<Entity, string> EntityFactory::createBasicEntity() {
+	if (generations != nullptr) {
+		unsigned int index = lastIndex;
+		if (
+			index == numEntities ||
+			freedIndices.getLength() > 0
+		) {
+			index = *freedIndices.extractNext();
+		}
+		else {
+			if (lastIndex >= numEntities) {
+				return Result<Entity, string>::error("No memory left to allocate an entity.");
+			}
 
-	unsigned int index = lastIndex;
-	if (
-		index == numEntities ||
-		freedIndices.getLength() > 0
-	) {
-		index = *freedIndices.extractNext();
+			++lastIndex;
+			generations[index] = 0;
+		}
+
+
+		Entity entity = {
+			EntityID(index, generations[index])
+		};
+		addComponent(entity, Components::TRANSFORM);
+		return Result<Entity, string>::ok(entity);
 	}
-	else {
-		assert(lastIndex < numEntities);
-
-		++lastIndex;
-		generations[index] = 0;
-	}
-
-
-	Entity entity = {
-		EntityID(index, generations[index])
-	};
-	addComponent(entity, Components::TRANSFORM);
-	return entity;
+	return Result<Entity, string>::error("Entity Factory has not been initialized.");
 }
 
 bool EntityFactory::doesEntityExist(const Entity& entity) {
-	assert(generations != nullptr);
-
-	return generations[entity.id.index] == entity.id.generation;
+	return generations != nullptr && generations[entity.id.index] == entity.id.generation;
 }
 
 bool EntityFactory::deleteEntity(const Entity& entity) {
-	assert(generations != nullptr);
-
-	if (doesEntityExist(entity) && freedIndices.getLength() != freedIndices.getCapacity()) {
+	if (generations != nullptr && doesEntityExist(entity) && freedIndices.getLength() != freedIndices.getCapacity()) {
 		++generations[entity.id.index];
 		freedIndices.add(entity.id.index);
 		return true;
@@ -87,8 +97,6 @@ bool EntityFactory::deleteEntity(const Entity& entity) {
 }
 
 bool EntityFactory::addComponent(Entity& entity, const Components& component) {
-	assert(generations != nullptr);
-	
 	if (!doesEntityExist(entity)) {
 		return false;
 	}
@@ -181,8 +189,6 @@ bool EntityFactory::addComponent(Entity& entity, const Components& component) {
 }
 
 bool EntityFactory::removeComponent(Entity& entity, const Components& component) {
-	assert(generations != nullptr);
-
 	if (!doesEntityExist(entity)) {
 		return false;
 	}
