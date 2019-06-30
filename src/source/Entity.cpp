@@ -2,13 +2,15 @@
 
 using namespace puggo;
 
+EntityID::EntityID() noexcept: index(numeric_limits<unsigned int>::max()), generation(numeric_limits<unsigned int>::max()) {}
+
 EntityID::EntityID(const unsigned int& index, const unsigned int& generation) :
 	index(index),
 	generation(generation) {
 
 }
 
-ComponentFlags::ComponentFlags():
+ComponentFlags::ComponentFlags() noexcept:
 	collisionBox(0),
 	collisionCapsule(0),
 	collisionSphere(0),
@@ -17,6 +19,22 @@ ComponentFlags::ComponentFlags():
 	shader(0),
 	move(0),
 	transform(0) {
+}
+
+Entity::Entity(const EntityID& id, const ComponentFlags& flags): id(id), flags(flags) {}
+Entity::Entity(const Entity& entity): id(entity.id), flags(entity.flags) {}
+Entity::Entity(Entity&& entity) noexcept: id(move(entity.id)), flags(move(entity.flags)) {}
+
+Entity& Entity::operator=(const Entity& entity) {
+	id = entity.id;
+	flags = entity.flags;
+	return *this;
+}
+
+Entity& Entity::operator=(Entity&& entity) noexcept {
+	id = move(entity.id);
+	flags = move(entity.flags);
+	return *this;
 }
 
 ostream& puggo::operator<<(ostream& out, const Entity& entity) noexcept {

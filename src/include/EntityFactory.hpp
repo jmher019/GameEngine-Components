@@ -32,19 +32,19 @@ namespace puggo {
 	class EntityFactory {
 	public:
 		// Call this function to initialize the memory in the factory
-		static void initialize(const unsigned int entityCapacity = MINIMUM_ENTITIES);
+		static void initialize(const unsigned int entityCapacity = 1024);
 
 		// Call this function to cleanup the memory in the factory
 		static void cleanUp();
 
 		// Creates an entity with just a transform component
-		static Entity createBasicEntity();
+		static Result<Entity, string> createBasicEntity();
 
 		// Utility check function to verify if an entity exists
 		static bool doesEntityExist(const Entity& entity);
 
 		// Deletes an entity (Caller is responsible for disposing reference to entity)
-		// Will fail if the entity has already been deleted or the limit of freed entities has been reached
+		// Will fail if the entity has already been deleted
 		static bool deleteEntity(const Entity& entity);
 
 		// Adds a component
@@ -56,8 +56,6 @@ namespace puggo {
 		static bool removeComponent(Entity& entity, const Components& component);
 
 	private:
-		static constexpr unsigned int MINIMUM_ENTITIES = 1024;
-
 		static unsigned int numEntities;
 		static HeapRingBuffer<unsigned int> freedIndices;
 		static unsigned int lastIndex;
